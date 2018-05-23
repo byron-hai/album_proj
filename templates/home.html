@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload photos</title>
+</head>
+
+<body>
+
+    {% if user %}
+        <p>Welcome: {{ user }}</p>
+    {% endif %}
+
+    <div class="album">
+        {% for image in photos %}
+        <div class="img">
+            <img src="{{ image.url }}">
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="upload">
+        <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+            <p>
+                <input type="file" name="image">
+                <input type="submit" value="Upload">
+            </p>
+        </form>
+    </div>
+</body>
+</html>
