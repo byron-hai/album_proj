@@ -12,7 +12,6 @@ app = Flask(__name__)
 app.secret_key = 'random string'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
 def allowed_file(filename):
     return os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -30,11 +29,18 @@ def index():
 def login():
     if request.method == 'POST':
         session['username'] = request.form['username']
-        if session['username'] == 'admin':
+        session['password'] = request.form['password']
+        if session['username'] == 'admin' and session['password'] == 'admin':
+            flash('You were loged in')
             return redirect(url_for('home', user=session['username']))
 
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You were logged out')
+    return redirect(url_for('index'))
 
 @app.route('/home/<user>')
 def home(user):

@@ -1,16 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
+{% extends 'base.html' %}
+{% block title %}
+    Login
+{% endblock %}
 
-<body>
-    <div class="login">
+{% block index %}
+    
+    <div style="width:40%; height:200px;">
+        <p>username/password: admin</p>
         <form action="" method="post">
-            <p><input type="text" name="username"></p>
+            <p>Username <input type="text" name="username"></p>
+            <p>Password <input type="password" name="password"></p>
             <p><input type="submit" value="Login"></p>
         </form>
     </div>
-</body>
-</html>
+
+{% endblock %}

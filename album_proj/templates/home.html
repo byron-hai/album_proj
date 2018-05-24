@@ -1,25 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload photos</title>
-</head>
+{% extends 'base.html' %}
+{% block title %}
+    Album
+{% endblock %}
 
-<body>
-
+{% block photo_main %}
     {% if user %}
+        <div style="text-align:right;">
+            <a href="{{ url_for('logout') }}">logout</a>
+        </div>
         <p>Welcome: {{ user }}</p>
     {% endif %}
 
-    <div class="album">
-        {% for image in photos %}
-        <div class="img">
-            <img src="{{ image.url }}">
-        </div>
-        {% endfor %}
-    </div>
-
-    <div class="upload">
+    <div style="text-align: left;">
+        <p>Upload your photos here<p><br>
         <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
             <p>
                 <input type="file" name="image">
@@ -27,5 +20,13 @@
             </p>
         </form>
     </div>
-</body>
-</html>
+
+    <div style="margin: 20px; border: solid 1px #ccdcff; overflow: auto">
+        {% for image in photos %}
+        <div style="width:20%; padding:4px; display:inline-block;">
+            <img src="{{ image.url }}" style="width: 100%">
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
