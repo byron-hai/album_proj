@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+    Login
+{% endblock %}
+
+{% block login %}
+    {% if get_flashed_messages() %}
+        <div style="color:Red; margin-bottom:20px;" id="message">
+            {% for message in get_flashed_messages() %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %} 
+   
+    <div style="padding:20px 60px; background-color:#9999cc; border-radius:20px;" onClick="document.getElementById('message').style.display='none';">
+
+        <p>username/password: admin</p>
+        <form action="" method="post">
+        <table style="text-align: left;">
+            <colgroup>
+                <col width="30%">
+                <col width="60%">
+            </colgroup>
+            <tr>
+                <td>Username</td>
+                <td><input type="text" name="username"></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><input type="password" name="password"></td>
+            </tr>
+        </table> 
+            <p><input type="submit" value="Login" style="margin-top: 20px;"></p>
+            <a href="{{ url_for('signup') }}">Have no account? Sign up here</a>
+        </form>
+
+    </div>
+
+{% endblock %}

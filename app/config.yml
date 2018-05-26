@@ -1,0 +1,4 @@
+aws_key: 'AKIAOLEI3EIBHJN6EHHA'
+aws_secret: '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'
+region: 'cn-north-1'
+bucket: 'bucket-img'
