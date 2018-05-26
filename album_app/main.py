@@ -69,6 +69,7 @@ def upload_file():
             return redirect(url_for('home', user=session['username']))
         else:
             img_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(img_file.filename)))
+            flash('Uploading finished')
             return redirect(url_for('home', user=session['username']))
 
     return redirect(request.url)
