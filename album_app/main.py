@@ -21,8 +21,7 @@ def index():
         username = session['username']
         return redirect(url_for('home', user=username))
 
-    return "You are not logged in <br><a href='/login'></b>" + \
-           "click here to log in</b></a>"
+    return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -31,7 +30,6 @@ def login():
         session['username'] = request.form['username']
         session['password'] = request.form['password']
         if session['username'] == 'admin' and session['password'] == 'admin':
-            flash('You were loged in')
             return redirect(url_for('home', user=session['username']))
         else:
             flash('Username or Password error! Try again.')
@@ -42,7 +40,6 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    flash('You were logged out')
     return redirect(url_for('index'))
 
 @app.route('/home/<user>')
@@ -59,7 +56,7 @@ def upload_file():
     if request.method == 'POST':
         if 'image' not in request.files:
             flash('No file part')
-            return redirect(request.url)
+            return redirect(url_for('home', user=session['username']))
 
         img_file = request.files['image']
 

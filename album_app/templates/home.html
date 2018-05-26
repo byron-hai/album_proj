@@ -12,8 +12,16 @@
         <p>Welcome: {{ user }}</p>
     {% endif %}
 
-    <div style="text-align: left;">
+    <div style="text-align: left;" onClick="document.getElementById('msgUpload').style.display='none';">
         <p>Upload your photos here<p><br>
+        {% if get_flashed_messages() %}
+            <div style="color:Red; margin-bottom:10px; text-align:left;" id="msgUpload">
+                {% for message in get_flashed_messages() %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
             <p>
                 <input type="file" name="image">
