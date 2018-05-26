@@ -33,6 +33,9 @@ def login():
         if session['username'] == 'admin' and session['password'] == 'admin':
             flash('You were loged in')
             return redirect(url_for('home', user=session['username']))
+        else:
+            flash('Username or Password error! Try again.')
+            return redirect(request.url)
 
     return render_template('login.html')
 

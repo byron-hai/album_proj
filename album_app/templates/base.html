@@ -8,13 +8,17 @@
     </title>
 </head>
 
-<body style="margin: 5% 10%; background-color: #f8fbfc; border: solid 1px #6699ff; text-align: center;">
-    <div style="padding:20px; background-color:White">
-        {% block photo_main %}{% endblock %}
+<body style="margin: 5% 10%; background-color: #f8fbfc;">
+
+    <div style="border:solid 1px #f0f8ff; text-align: center; background-color:White;">
+        <div >
+            {% block photo_main %}{% endblock %}
+        </div>
+
+        <div style="position:relative; margin:10% 20%; padding: 40px;">
+            {% block index %}{% endblock %}
+        </div>
     </div>
 
-    <div style="padding:20px; background-color:White">
-        {% block index %}{% endblock %}
-    </div>
 </body>
 </html>

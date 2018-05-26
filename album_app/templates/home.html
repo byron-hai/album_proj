@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block photo_main %}
+<div style="padding:20px; background-color:White;">
     {% if user %}
         <div style="text-align:right;">
             <a href="{{ url_for('logout') }}">logout</a>
@@ -28,5 +29,5 @@
         </div>
         {% endfor %}
     </div>
-
+</div>
 {% endblock %}
