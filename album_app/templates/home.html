@@ -9,7 +9,9 @@
         <div style="text-align:right;">
             <a href="{{ url_for('logout') }}">logout</a>
         </div>
-        <p>Welcome: {{ user }}</p>
+        <p style="color:#33cc00; font-size: 20px;">
+            Welcome: <span style="color:#006600;">{{ user }}</span>
+        </p>
     {% endif %}
 
     <div style="text-align: left;" onClick="document.getElementById('msgUpload').style.display='none';">
