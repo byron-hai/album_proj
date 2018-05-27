@@ -32,12 +32,16 @@
         </form>
     </div>
 
-    <div style="margin: 20px; border: solid 1px #ccdcff; overflow: auto">
-        {% for image in photos %}
-        <div style="width:20%; padding:4px; display:inline-block;">
-            <img src="{{ image.url }}" style="width: 100%">
-        </div>
-        {% endfor %}
+    <div style="margin:30px 10px; border:solid 1px #ccdcff;height:auto; text-align:left;">
+        {% if photos %}
+            {% for image in photos %}
+                <div style="text-align:center; margin:10px; padding:10px; display:inline-block;">
+                    <img src="{{ image['url'] }}" style="height: 160px;">
+                    <p>{{ image['upload_date'] }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 </div>
+
 {% endblock %}

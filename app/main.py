@@ -2,10 +2,12 @@
 import os
 import yaml
 import logging
+from datetime import datetime
 from flask import Flask, session, flash, request, redirect,\
                   render_template, url_for, abort
 from werkzeug.utils import secure_filename
 from boto_s3 import S3
+from dynamodb import DynamoDB
 
 fmt = '%(levelname)-6s %(message)s'
 logging.basicConfig(level='INFO', format=fmt)
@@ -24,6 +26,7 @@ if os.path.exists('config.yml'):
        cfg = yaml.load(ymfile)
 else:
     logger.error("Config file not found")
+
 def allowed_file(filename):
     return os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -37,18 +40,46 @@ def index():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-   return render_template('signup.html') 
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
 
+        db = DynamoDB(region=cfg['region'])
+        user_table = cfg['db_tbl']['user']
+
+        if not db._isTable_exists(user_table):
+            db.create_table(table_name=user_table,
+                            attr_dict={'hash_name': "username"})
+
+        user_info = {'username': username.strip(),
+                     'password': password.strip(),
+                     'email': email.strip()}
+
+        db.insert_item(user_table, user_info)
+        return redirect(url_for('login'))
+
+    return render_template('signup.html') 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         session['username'] = request.form['username']
         session['password'] = request.form['password']
-        if session['username'] == 'admin' and session['password'] == 'admin':
-            return redirect(url_for('home', user=session['username']))
-        else:
-            flash('Username or Password error! Try again.')
+
+        db = DynamoDB(region=cfg['region'])
+        user_table = cfg['db_tbl']['user']
+
+        if not db._isTable_exists(user_table):
+            db.create_table(table_name=user_table,
+                            attr_dict={'hash_name': "username"})
+
+        try:
+            user = db.get_item(user_table, {'username': session['username']})
+            if user and user['password'] == session['password']:
+                return redirect(url_for('home', user=session['username']))
+        except:
+            flash('Username or Password does not exist')
             return redirect(request.url)
 
     return render_template('login.html')
@@ -63,9 +94,14 @@ def home(user):
     if user is None:
         abort(404)
 
-    photos = 'get all photos by user'
-    return render_template('home.html', user=user, photos=photos)
-
+    try:
+        photo_table = cfg['db_tbl']['album']
+        photos = DynamoDB(region=cfg['region']).scan_item(photo_table, 'owner', user)
+    
+        return render_template('home.html', user=user, photos=photos)
+    except Exception as err:
+        logger.info(err) 
+        return render_template('home.html', user=user, photos='')
 
 @app.route('/home/<user>/upload', methods=['GET', 'POST'])
 def upload_file(user):
@@ -88,14 +124,27 @@ def upload_file(user):
             img_file.save(local_img_path)
 
             if os.path.exists(local_img_path):
+                logger.debug('Image saved. %s', local_img_path)
+
                 try:
+                    filename = secure_filename(img_file.filename)
                     session = S3(aws_key=cfg['aws_key'], aws_secret=cfg['aws_secret'], region=cfg['region'])
-                    url = session.upload_file_to_s3(local_img_path,
-                                                    cfg['bucket'],
-                                                    secure_filename(img_file.filename))
+                    url = session.upload_file_to_s3(local_img_path, cfg['bucket'], filename)
+
+                    db = DynamoDB(region=cfg['region'])
+                    photo_table = cfg['db_tbl']['album']
+
+                    if not db._isTable_exists(photo_table):
+                        db.create_table(table_name=photo_table,
+                                        attr_dict={'hash_name':'owner', 'range_name': 'group'})
                     if url:
-                        logger.info(url)
-                        ''' Store url to dynamodb '''
+                        db.insert_item(photo_table, {'owner': user,
+                                                     'group': cfg['group']['pub'],
+                                                     'filename': filename,
+                                                     'url': url,
+                                                     'upload_date': datetime.now().date().strftime('%Y-%m-%d'),
+                                                     })
+
                         flash('Uploading finished.')
                         return redirect(url_for('home', user=user))
                     else:

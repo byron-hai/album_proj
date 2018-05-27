@@ -1,14 +1,10 @@
-# coding: utf-8
+#coding: utf-8
 import boto3
 from flask import current_app as app
 import logging
 
 fmt = '%(levelname)-6s %(message)s'
 logging.basicConfig(level='INFO', format=fmt)
-
-aws_key = 'AKIAOLEI3EIBHJN6EHHA'
-aws_secret = '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'
-region = 'cn-north-1'
 
 class S3:
     def __init__(self, aws_key=None, aws_secret=None, region=None, logging=logging):
@@ -39,7 +35,15 @@ class S3:
     def get_bucket_objs(self, bucket_name):
         try:
             objs = self.s3.list_objects(Bucket=bucket_name)
-            return objs if objs else None
+            filenames = []
+            if 'Contents' in objs.keys():
+                objs_contents = objs['Contents']
+
+                for i in range(len(objs_contents)):
+                    filenames.append(objs_contents[i]['Key'].encode('utf-8'))
+
+            return {bucket_name: filenames} if len(filenames) > 0 else None
+
         except Exception as err:
             self.logger.error(str(err))
             return
