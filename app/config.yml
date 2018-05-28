@@ -1,6 +1,6 @@
-aws_key: 'AKIAOLEI3EIBHJN6EHHA'
-aws_secret: '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'
-region: 'cn-north-1'
+aws_key: 'AWS-KEY'
+aws_secret: 'AWS-SECRET-KEY'
+region: 'region'
 bucket: 'bucket-img'
 
 db_tbl:

@@ -1,4 +1,4 @@
-from album_app import album_app
+from album_proj import app
 
 if __name__ == "__main__":
     app.run()
