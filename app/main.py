@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.secret_key = 'random string'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-if os.path.exists('config.yml'):
+if os.path.exists('/***/config.yml'):
     with open('config.yml', 'r') as ymfile:
        cfg = yaml.load(ymfile)
 else:
