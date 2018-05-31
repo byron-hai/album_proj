@@ -1,0 +1,106 @@
+Reference
+http://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html
+
+Installation
+-------------------------------------------------------------------------------
+For Debin based
+    apt-get install build-essential python-dev
+    pip install uwsgi
+
+
+
+-------------------------------------------------------------------------------
+1. WSGI application
+
+--------------------------------------------------------------------------------
+## foobar.py
+
+def application(env, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return [b'Hello world']
+
+Deploy it on HTTP port 9090
+
+uwsgi --http :9090 --wsgi-file foobar.py --master --processes 4 --thread
+
+________________________________________________________________________________
+
+Nginx config
+
+usually, lt looks like
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1: 8080;
+    }
+
+That means pass every request to the serve bound to port 8080
+Now spawn uWSGI to natively speak the uwsgi protocol
+
+uwsgi --socket 127.0.0.1:8080 --wsgi-file foobar.py --master --processes 4 \
+      --threads 2 --stats 127.0.0.1:9091
+
+Note: Don't miss threads, or application will not work
+
+________________________________________________________________________________
+
+Automatically starting uWSGI on boot
+
+Deploying Django project
+
+First we define a xxx.ini file
+
+[uwsgi]
+socket = 127.0.0.1:8080
+chdir = /dir/to/your_proj/
+wsfi-file = your_proj/wsgi.py
+processes = 4
+threads = 2
+status = 127.0.0.1:9091
+
+Just run: uwsgi xxx.ini
+
+Deploying Flask
+
+## myapp.py
+
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "<span style='color:red'> This is home page of flask</span>"
+
+--------------------------------------------------------------------------------
+uwsgi --socket 127.0.0.1:8080 --wsgi-file myapp.py --callable app --process 2\
+      --threads 2 --stats 127.0.0.1:9091
+--------------------------------------------------------------------------------
+
+or in myapp.py, we define app with application, then "callable" can be ignored
+
+Note on python threads
+
+If you want to maintain Python threads support without starting multiple threads
+for your application, just add the --enable-threads option
+(or enable-threads = true in ini style).
+
+________________________________________________________________________________
+
+Virtualenvs
+
+Add virtualenv = <path>
+
+Security and availability
+
+Always avoid running your uWSGI instances as root. You can drop privileges using
+the uid and gid options:
+
+[uwsgi]
+https = :8080, foobar.crt, foobar.key
+uid = foo
+gid = bar
+chdir = xxx
+master = true
+processes = 4
+
+
