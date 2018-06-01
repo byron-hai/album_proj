@@ -7,8 +7,6 @@ For Debin based
     apt-get install build-essential python-dev
     pip install uwsgi
 
-
-
 -------------------------------------------------------------------------------
 1. WSGI application
 
@@ -53,14 +51,28 @@ First we define a xxx.ini file
 [uwsgi]
 socket = 127.0.0.1:8080
 chdir = /dir/to/your_proj/
-wsfi-file = your_proj/wsgi.py
+wsgi-file = your_proj/wsgi.py
 processes = 4
 threads = 2
-status = 127.0.0.1:9091
+stats = 127.0.0.1:9091
 
 Just run: uwsgi xxx.ini
+================================================================================
 
 Deploying Flask
+
+[uwsgi]
+socket = 127.0.0.1:8080
+chmod-socket = 664
+#uid = user
+#gid = group
+chdir = /dir/to/your_proj/
+module = wsgi:application
+processes = 4
+threads = 2
+vacuum = true
+die-on-term = true ## This is for uwsgi can kill the process
+
 
 ## myapp.py
 
@@ -103,4 +115,83 @@ chdir = xxx
 master = true
 processes = 4
 
+________________________________________________________________________________
 
+Nginx Config
+
+/etc/nginx/nginx.conf
+
+Add line after
+        include /etc/nginx/conf.d/*.conf;
+    It looks like:
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+
+    Or you can add your new conf file under:
+        /etc/nginx/conf.d/
+
+If choose sites-enabled:
+    sudo mkdir -p /etc/nginx/sites-avaliable/
+    sudo mkdir -p /etc/nginx/sites-enabled/
+
+then add new config file in sites-avaliable/, say: my_proj.conf
+
+config lines:
+
+server {
+        listen 9090;
+        server_name localhost; # server_domin_or_IP;
+
+        location / {
+                include uwsgi_params;
+                uwsgi_pass unix:/dir/to/my_proj/my_proj.sock;
+        }
+
+Next add symble link file:
+
+sudo ln -s /etc/nginx/sites-avaliable/my_proj.conf /etc/nginx/sites-enabled/
+
+If has static, config it in server:
+
+server {
+        listen 80;
+        server_name localhost; # server_domin_or_IP;
+
+        location /static/ {
+            alias /dir/to/my_proj/static/;
+        }
+
+        location / {
+                include uwsgi_params;
+                uwsgi_pass unix:/dir/to/my_proj/my_proj.sock;
+        }
+
+Finally, try by restarting nginx
+    sudo service nginx configtest
+
+    No problems, do
+    sudo service nginx restart
+
+________________________________________________________________________________
+
+Create Upstart file (Not available. Try else) 
+
+sudo vim /etc/init/myApp.conf
+
+    description "uWSGI instance to server myapp"
+
+    start on runlevel [2345]
+    stop on runlevel [!2345]
+
+    setuid ***
+    setgit www-data
+
+    script
+        cd /dir/to/my_proj
+        . virtualenv/bin/activate   ## must be . instead of source
+        uwsgi --ini myapp.ini
+    end script
+
+Next test it by
+    sudo start myapp
+    sudo stop myapp
